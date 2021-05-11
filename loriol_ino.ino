@@ -51,21 +51,9 @@ void loop() {
     Serial.println("New client.");
     // an http request ends with a blank line
     boolean currentLineIsBlank = true;
-    boolean firstSlashPassed = false;
-    boolean copyNow = false;
-    String path;
     while (client.connected()) {
       if (client.available()) {
         char c = client.read();
-        // Copy here
-        if (copyNow) path += c;
-        if (c == '/' && !firstSlashPassed) {
-          firstSlashPassed = true;
-          copyNow = true;
-        }
-        if (path == "test") {
-          copyNow = false;
-        }
         // if you've gotten to the end of the line (received a newline
         // character) and the line is blank, the http request has ended,
         // so you can send a reply
@@ -90,7 +78,6 @@ void loop() {
         }
       }
     }
-    Serial.println(path);
     // give the web browser time to receive the data
     delay(1);
     // close the connection:
