@@ -1,5 +1,7 @@
 #include <SPI.h>
 #include <Ethernet.h>
+int Moteur = 3;
+int Valeur_Moteur;
 
 // Mac address of the ethernet shield and corresponding ip address
 byte mac[] {
@@ -8,13 +10,14 @@ byte mac[] {
 IPAddress ip(192, 168, 13, 247);
 
 int sndPort1 = A0;
+int nbr = 0;
 
 EthernetServer server(80);
 
 void setup() {
   // # Analog setup
   pinMode(sndPort1, INPUT);
-
+  pinMode(Moteur, OUTPUT);
   // # Ethernet setup
   Ethernet.init(10);
 
@@ -22,7 +25,6 @@ void setup() {
   while (!Serial) {
     ; // Waiting for the serial port to connect
   }
-  Serial.println("Ethernet webserver example");
 
   // Starts the ethernet connection
   Ethernet.begin(mac, ip);
@@ -38,10 +40,8 @@ void setup() {
     Serial.println("Ethernet cable is not connected.");
   }
 
-  // Starts the server
+  // Starts the serverx
   server.begin();
-  Serial.print("Started server at ");
-  Serial.println(Ethernet.localIP());
 }
 
 void loop() {
@@ -62,8 +62,19 @@ void loop() {
           firstSlashPassed = true;
           copyNow = true;
         }
-        if (c == '%') {
+        if (c == '$') {
           copyNow = false;
+          path[path.length() - 1] = '\0';
+          if (path.length() > 5) {
+            path = "";
+          } else {
+            nbr = path.toInt();
+          }
+          Serial.print("path : \"");
+          Serial.print(path);
+          Serial.print("\", nbr : \"");
+          Serial.print(nbr);
+          Serial.println("\"");
         }
         if (path == "favicon.ico") {
           copyNow = false;
@@ -78,9 +89,9 @@ void loop() {
           client.println("Content-Type: text/html");
           client.println("Connection: close");  // the connection will be closed after completion of the response
           client.println("");
-          client.print("ok");
+          client.print("<html><body>bruh</body></html>");
           client.println("");
-          break;
+          client.stop();
         }
         if (c == '\n') {
           // you're starting a new line
@@ -91,13 +102,10 @@ void loop() {
         }
       }
     }
-    // Removing last char, which is a useless '%'
-    path[path.length()-1] = '\0';
-    int nbr = path.toInt();
-    Serial.println(nbr);
     // give the web browser time to receive the data
     delay(1);
     // close the connection:
     client.stop();
   }
+  // > nbr récupéré ici <
 }
